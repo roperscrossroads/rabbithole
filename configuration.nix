@@ -24,6 +24,8 @@ in {
     bspwm
     sxhkd  # bspwm's hotkey daemon
     xorg.xinit
+    xorg.xvfb
+    x11vnc
   ];
 
   services.openssh.enable = true;
@@ -88,6 +90,30 @@ in {
     super + {_,shift + }{h,j,k,l}
         bspc node -p {west,south,north,east}
   '';
+
+  # Start Xvfb on boot
+  systemd.services.xvfb = {
+    description = "Xvfb Virtual Framebuffer";
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.xorg.xvfb}/bin/Xvfb :1 -screen 0 1024x768x16";
+      Restart = "always";
+      User = "root";
+    };
+  };
+
+  # Start x11vnc on boot
+  systemd.services.x11vnc = {
+    description = "x11vnc VNC Server";
+    after = [ "xvfb.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.x11vnc}/bin/x11vnc -display :1 -forever -nopw -shared";
+      Restart = "always";
+      User = "root";
+    };
+  };
 
   system.stateVersion = "24.11";
 }
