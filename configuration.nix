@@ -23,6 +23,7 @@ in {
     vim
     bspwm
     sxhkd  # bspwm's hotkey daemon
+    xorg.xinit
   ];
 
   services.openssh.enable = true;
@@ -78,15 +79,15 @@ in {
   
   services.xserver.enable = true;
   services.xserver.windowManager.bspwm.enable = true;
-  services.xserver.windowManager.bspwm.config = {
-    sxhkdrc = ''
-      # Example key bindings
-      super + Return
-          bspc node -t floating
-      super + {_,shift + }{h,j,k,l}
-          bspc node -p {west,south,north,east}
-    '';
-  };
+
+  # Configure sxhkd separately
+  environment.etc."xdg/sxhkd/sxhkdrc".text = ''
+    # Example key bindings
+    super + Return
+        bspc node -t floating
+    super + {_,shift + }{h,j,k,l}
+        bspc node -p {west,south,north,east}
+  '';
 
   system.stateVersion = "24.11";
 }
